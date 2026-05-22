@@ -1,0 +1,66 @@
+# Instancias de configuración y variables de entorno
+.env
+.env.local
+.flaskenv
+
+# Archivos de entorno virtual
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Archivos de base de datos
+*.sqlite3
+
+# Distribuciones y empaquetado
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Instaladores
+*.manifest
+*.spec
+
+# Archivos de caché e información
+.vscode/
+.idea/
+.spyderproject
+.spyproject
+*.sublime-workspace
+*.sublime-project
+
+# Archivos de registro / Logs
+*.log
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Directorios de pruebas
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/'

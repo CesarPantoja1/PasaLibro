@@ -1,0 +1,122 @@
+{% extends 'shared/base.html' %}
+{% block title %}{{ book.titulo }} - PasaLibro{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/books/books.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="book-detail">
+    <!-- Back navigation -->
+    <div class="book-detail-header">
+        <a href="{{ url_for('books.dashboard') }}" class="book-detail-back">
+            <i class="fas fa-arrow-left"></i> Catálogo
+        </a>
+    </div>
+
+    <!-- Main Card -->
+    <div class="book-detail-card">
+        <div class="book-detail-layout">
+            <!-- Image Section -->
+            <div class="book-detail-image-section">
+                {% if book.imagen_url %}
+                <img src="{{ book.imagen_url }}" alt="{{ book.titulo }}">
+                {% else %}
+                <div class="book-detail-image-placeholder">
+                    <i class="fas fa-book"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Info Section -->
+            <div class="book-detail-info">
+                <!-- Badges -->
+                <div class="book-detail-badges">
+                    <span class="nivel-badge-lg nivel-{{ book.nivel|lower }}">
+                        <i class="fas fa-layer-group"></i>&nbsp; {{ book.nivel }}
+                    </span>
+                    {% if book.estado == 'disponible' %}
+                    <span class="book-detail-status status-disponible">
+                        <i class="fas fa-circle"></i> Disponible
+                    </span>
+                    {% else %}
+                    <span class="book-detail-status status-vendido">
+                        <i class="fas fa-circle"></i> Vendido
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- Title & Author -->
+                <h1 class="book-detail-title">{{ book.titulo }}</h1>
+                <p class="book-detail-author">
+                    <i class="fas fa-user-pen"></i> {{ book.autor }}
+                </p>
+
+                <!-- Price -->
+                <div class="book-detail-price">${{ "%.2f"|format(book.precio) }}</div>
+
+                <!-- Description -->
+                {% if book.descripcion %}
+                <div class="book-detail-description">{{ book.descripcion }}</div>
+                {% endif %}
+
+                <!-- Meta -->
+                <div class="book-detail-meta">
+                    <span class="book-detail-meta-item">
+                        <i class="fas fa-user"></i> {{ book.owner.nombre }}
+                    </span>
+                    <span class="book-detail-meta-item">
+                        <i class="fas fa-calendar"></i> {{ book.created_at.strftime('%d/%m/%Y') }}
+                    </span>
+                </div>
+
+                <!-- Actions -->
+                <div class="book-detail-actions">
+                    {% if current_user.id == book.user_id %}
+                        <!-- Owner actions -->
+                        <a href="{{ url_for('books.edit', id=book.id) }}" class="btn-action btn-action-edit">
+                            <i class="fas fa-pen"></i> Editar
+                        </a>
+
+                        <form action="{{ url_for('books.toggle_status', id=book.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% if book.estado == 'disponible' %}
+                            <button type="submit" class="btn-action btn-action-status">
+                                <i class="fas fa-check-circle"></i> Marcar vendido
+                            </button>
+                            {% else %}
+                            <button type="submit" class="btn-action btn-action-status-sold">
+                                <i class="fas fa-rotate-left"></i> Marcar disponible
+                            </button>
+                            {% endif %}
+                        </form>
+
+                        <form action="{{ url_for('books.delete', id=book.id) }}" method="POST"
+                              class="delete-form" data-book-title="{{ book.titulo }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn-action btn-action-danger">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </form>
+
+                    {% else %}
+                        <!-- Buyer actions -->
+                        {% if book.estado == 'disponible' %}
+                        <a href="#" class="btn-action btn-action-chat" onclick="alert('El módulo de chat será implementado por tu compañero Juan. ¡Pronto podrás negociar aquí!')">
+                            <i class="fas fa-comments"></i> Contactar al vendedor
+                        </a>
+                        {% else %}
+                        <span class="btn-action btn-action-disabled">
+                            <i class="fas fa-ban"></i> Este libro ya fue vendido
+                        </span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/books.js') }}"></script>
+{% endblock %}

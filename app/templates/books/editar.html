@@ -1,0 +1,150 @@
+{% extends 'shared/base.html' %}
+{% block title %}Editar libro - PasaLibro{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/books/books.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="books-page book-form-page">
+    <div class="book-detail-header">
+        <a href="{{ url_for('books.detail', id=book.id) }}" class="book-detail-back">
+            <i class="fas fa-arrow-left"></i>
+            Volver al detalle
+        </a>
+    </div>
+
+    <div class="books-page-heading books-page-heading--compact">
+        <div>
+            <span class="books-eyebrow">Edición</span>
+            <h1>Editar libro</h1>
+            <p>Actualiza la información visible de tu publicación.</p>
+        </div>
+    </div>
+
+    <div class="book-form-layout">
+        <form method="POST" action="{{ url_for('books.edit', id=book.id) }}" enctype="multipart/form-data" id="book-form" class="book-form-card">
+            {{ form.hidden_tag() }}
+
+            <div class="book-form-section">
+                <div class="book-form-section-title">
+                    <span>01</span>
+                    <h2>Información del libro</h2>
+                </div>
+
+                <div class="book-form-group">
+                    <label class="book-form-label" for="titulo">
+                        Título del libro <span class="required">*</span>
+                    </label>
+                    {{ form.titulo(class="book-form-input" + (" is-invalid" if form.titulo.errors else ""),
+                       placeholder="Ej: English File Upper-Intermediate", id="titulo") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.titulo.errors %}{{ error }}{% endfor %}
+                    </div>
+                </div>
+
+                <div class="book-form-group">
+                    <label class="book-form-label" for="autor">
+                        Autor <span class="required">*</span>
+                    </label>
+                    {{ form.autor(class="book-form-input" + (" is-invalid" if form.autor.errors else ""),
+                       placeholder="Ej: Christina Latham-Koenig", id="autor") }}
+                    <div class="invalid-feedback">
+                        {% for error in form.autor.errors %}{{ error }}{% endfor %}
+                    </div>
+                </div>
+
+                <div class="book-form-row">
+                    <div class="book-form-group">
+                        <label class="book-form-label" for="nivel">
+                            Nivel de inglés <span class="required">*</span>
+                        </label>
+                        {{ form.nivel(class="book-form-select" + (" is-invalid" if form.nivel.errors else ""), id="nivel") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.nivel.errors %}{{ error }}{% endfor %}
+                        </div>
+                    </div>
+                    <div class="book-form-group">
+                        <label class="book-form-label" for="precio">
+                            Precio ($) <span class="required">*</span>
+                        </label>
+                        {{ form.precio(class="book-form-input" + (" is-invalid" if form.precio.errors else ""),
+                           placeholder="Ej: 15.00", step="0.01", min="0.01", max="999.99", id="precio") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.precio.errors %}{{ error }}{% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="book-form-section">
+                <div class="book-form-section-title">
+                    <span>02</span>
+                    <h2>Detalles y foto</h2>
+                </div>
+
+                <div class="book-form-group">
+                    <label class="book-form-label" for="descripcion">
+                        Descripción
+                    </label>
+                    {{ form.descripcion(class="book-form-textarea" + (" is-invalid" if form.descripcion.errors else ""),
+                       placeholder="Estado del libro, notas, subrayados o materiales incluidos", rows="4",
+                       id="descripcion", maxlength="1000") }}
+                    <div class="char-counter" id="char-counter">0 / 1000</div>
+                    <div class="invalid-feedback">
+                        {% for error in form.descripcion.errors %}{{ error }}{% endfor %}
+                    </div>
+                </div>
+
+                <div class="book-form-group">
+                    <label class="book-form-label">
+                        Imagen del libro
+                    </label>
+
+                    {% if book.imagen_url %}
+                    <div class="book-current-image">
+                        <img src="{{ book.imagen_url }}" alt="{{ book.titulo }}">
+                        <div class="book-current-image-info">
+                            <strong>Imagen actual</strong>
+                            <span>Selecciona una imagen nueva para reemplazarla.</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="book-upload-zone" id="upload-zone">
+                        {{ form.imagen(id="imagen") }}
+                        <div class="book-upload-icon">
+                            <i class="fas fa-cloud-arrow-up"></i>
+                        </div>
+                        <p class="book-upload-text">
+                            <strong>{{ 'Cambiar imagen' if book.imagen_url else 'Subir imagen' }}</strong> o arrastrar archivo aquí
+                        </p>
+                        <p class="book-upload-hint">JPG, PNG, WEBP o GIF · Máx. 5 MB</p>
+                    </div>
+                    <div class="image-preview" id="image-preview">
+                        <img id="preview-img" src="" alt="Vista previa">
+                        <div class="image-preview-info">
+                            <span class="preview-filename" id="preview-name"></span>
+                            <span class="preview-filesize" id="preview-size"></span>
+                        </div>
+                        <button type="button" class="remove-btn" id="remove-image" title="Remover imagen">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    {% for error in form.imagen.errors %}
+                    <div class="invalid-feedback force-show">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="book-form-submit">
+                <i class="fas fa-save"></i>
+                Guardar cambios
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/books.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'shared/base.html' %}
+{% block title %}Catálogo de libros - PasaLibro{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/books/books.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set disponibles = books|selectattr('estado', 'equalto', 'disponible')|list|length %}
+{% set vendidos = books|selectattr('estado', 'equalto', 'vendido')|list|length %}
+
+<section class="books-page books-page--catalog">
+    <div class="books-page-heading">
+        <div>
+            <span class="books-eyebrow">Catálogo</span>
+            <h1>Libros de inglés disponibles</h1>
+            <p>Encuentra textos por nivel, autor y precio sin perder de vista el estado de cada publicación.</p>
+        </div>
+        <a href="{{ url_for('books.create') }}" class="books-primary-action">
+            <i class="fas fa-plus"></i>
+            <span>Publicar libro</span>
+        </a>
+    </div>
+
+    <form class="books-filters" method="GET" action="{{ url_for('books.dashboard') }}" id="filter-form">
+        <div class="books-search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" class="books-search-input"
+                   placeholder="Buscar por título o autor"
+                   value="{{ request.args.get('q', '') }}">
+        </div>
+        <div class="books-filter-row">
+            <select name="nivel" class="books-filter-select" aria-label="Nivel de inglés">
+                <option value="">Todos los niveles</option>
+                {% for n in niveles %}
+                <option value="{{ n }}" {{ 'selected' if request.args.get('nivel') == n }}>{{ n }}</option>
+                {% endfor %}
+            </select>
+            <input type="number" name="precio_min" class="books-filter-input"
+                   placeholder="$ mín." value="{{ request.args.get('precio_min', '') }}"
+                   step="0.01" min="0" aria-label="Precio mínimo">
+            <input type="number" name="precio_max" class="books-filter-input"
+                   placeholder="$ máx." value="{{ request.args.get('precio_max', '') }}"
+                   step="0.01" min="0" aria-label="Precio máximo">
+            <select name="estado" class="books-filter-select" aria-label="Estado">
+                <option value="">Todo estado</option>
+                <option value="disponible" {{ 'selected' if request.args.get('estado') == 'disponible' }}>Disponible</option>
+                <option value="vendido" {{ 'selected' if request.args.get('estado') == 'vendido' }}>Vendido</option>
+            </select>
+            <button type="submit" class="books-filter-btn">
+                <i class="fas fa-filter"></i>
+                <span>Filtrar</span>
+            </button>
+        </div>
+    </form>
+
+    <div class="books-summary-bar">
+        <div class="books-summary-item">
+            <strong>{{ books|length }}</strong>
+            <span>resultado{{ 's' if books|length != 1 else '' }}</span>
+        </div>
+        <div class="books-summary-item">
+            <strong>{{ disponibles }}</strong>
+            <span>disponible{{ 's' if disponibles != 1 else '' }}</span>
+        </div>
+        <div class="books-summary-item">
+            <strong>{{ vendidos }}</strong>
+            <span>vendido{{ 's' if vendidos != 1 else '' }}</span>
+        </div>
+        {% if request.args.get('q') or request.args.get('nivel') or request.args.get('precio_min') or request.args.get('precio_max') or request.args.get('estado') %}
+        <a href="{{ url_for('books.dashboard') }}" class="books-clear-filters">
+            <i class="fas fa-xmark"></i>
+            Limpiar filtros
+        </a>
+        {% endif %}
+    </div>
+
+    {% if books %}
+    <div class="books-grid" aria-live="polite">
+        {% for book in books %}
+        <a href="{{ url_for('books.detail', id=book.id) }}" class="book-card {{ 'book-card--sold' if book.estado == 'vendido' }}">
+            <div class="book-card-image">
+                {% if book.imagen_url %}
+                <img src="{{ book.imagen_url }}" alt="{{ book.titulo }}" loading="lazy">
+                {% else %}
+                <div class="book-card-placeholder">
+                    <i class="fas fa-book"></i>
+                </div>
+                {% endif %}
+                <span class="nivel-badge nivel-{{ book.nivel|lower }}">{{ book.nivel }}</span>
+                <span class="book-status-badge status-{{ book.estado }}">
+                    {{ 'Disponible' if book.estado == 'disponible' else 'Vendido' }}
+                </span>
+            </div>
+            <div class="book-card-body">
+                <h2 class="book-card-title">{{ book.titulo }}</h2>
+                <p class="book-card-author">
+                    <i class="fas fa-user-pen"></i>
+                    {{ book.autor }}
+                </p>
+                <div class="book-card-footer">
+                    <span class="book-card-price">${{ "%.2f"|format(book.precio) }}</span>
+                    <span class="book-card-seller">{{ book.owner.nombre }}</span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="books-empty">
+        <div class="books-empty-icon">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <h2>No se encontraron libros</h2>
+        <p>Prueba con otro filtro o publica el primer libro para este nivel.</p>
+        <a href="{{ url_for('books.create') }}" class="books-empty-btn">
+            <i class="fas fa-plus"></i>
+            Publicar un libro
+        </a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/books.js') }}"></script>
+{% endblock %}

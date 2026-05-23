@@ -1,0 +1,110 @@
+{% extends 'shared/base.html' %}
+{% block title %}Mis libros - PasaLibro{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/books/books.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set disponibles = books|selectattr('estado', 'equalto', 'disponible')|list|length %}
+{% set vendidos = books|selectattr('estado', 'equalto', 'vendido')|list|length %}
+
+<section class="books-page my-books-page">
+    <div class="books-page-heading">
+        <div>
+            <span class="books-eyebrow">Mis publicaciones</span>
+            <h1>Mis libros</h1>
+            <p>Gestiona tus publicaciones, edita datos y cambia el estado cuando una venta se cierre.</p>
+        </div>
+        <a href="{{ url_for('books.create') }}" class="books-primary-action">
+            <i class="fas fa-plus"></i>
+            <span>Publicar libro</span>
+        </a>
+    </div>
+
+    <div class="my-books-stats">
+        <div class="my-books-stat">
+            <span>Total</span>
+            <strong>{{ books|length }}</strong>
+        </div>
+        <div class="my-books-stat">
+            <span>Disponibles</span>
+            <strong>{{ disponibles }}</strong>
+        </div>
+        <div class="my-books-stat">
+            <span>Vendidos</span>
+            <strong>{{ vendidos }}</strong>
+        </div>
+    </div>
+
+    {% if books %}
+    <div class="my-books-list">
+        {% for book in books %}
+        <article class="my-book-item">
+            <a href="{{ url_for('books.detail', id=book.id) }}" class="my-book-item-image" aria-label="Ver {{ book.titulo }}">
+                {% if book.imagen_url %}
+                <img src="{{ book.imagen_url }}" alt="{{ book.titulo }}" loading="lazy">
+                {% else %}
+                <span class="my-book-item-placeholder">
+                    <i class="fas fa-book"></i>
+                </span>
+                {% endif %}
+            </a>
+
+            <div class="my-book-item-info">
+                <div class="my-book-item-topline">
+                    <span class="nivel-badge-inline nivel-{{ book.nivel|lower }}">{{ book.nivel }}</span>
+                    <span class="book-status-inline status-{{ book.estado }}">
+                        <i class="fas fa-circle"></i>
+                        {{ 'Disponible' if book.estado == 'disponible' else 'Vendido' }}
+                    </span>
+                </div>
+                <h2 class="my-book-item-title">
+                    <a href="{{ url_for('books.detail', id=book.id) }}">{{ book.titulo }}</a>
+                </h2>
+                <div class="my-book-item-meta">
+                    <span><i class="fas fa-user-pen"></i> {{ book.autor }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ book.created_at.strftime('%d/%m/%Y') }}</span>
+                </div>
+            </div>
+
+            <div class="my-book-item-price">
+                <span>${{ "%.2f"|format(book.precio) }}</span>
+            </div>
+
+            <div class="my-book-item-actions">
+                <a href="{{ url_for('books.detail', id=book.id) }}" class="my-book-action my-book-action-view" title="Ver detalle" aria-label="Ver detalle">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <a href="{{ url_for('books.edit', id=book.id) }}" class="my-book-action my-book-action-edit" title="Editar" aria-label="Editar">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <form action="{{ url_for('books.delete', id=book.id) }}" method="POST"
+                      class="delete-form" data-book-title="{{ book.titulo }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="my-book-action my-book-action-delete" title="Eliminar" aria-label="Eliminar">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </form>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="books-empty">
+        <div class="books-empty-icon">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <h2>Aún no has publicado libros</h2>
+        <p>Cuando publiques tu primer libro aparecerá aquí con sus acciones de gestión.</p>
+        <a href="{{ url_for('books.create') }}" class="books-empty-btn">
+            <i class="fas fa-plus"></i>
+            Publicar mi primer libro
+        </a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/books.js') }}"></script>
+{% endblock %}

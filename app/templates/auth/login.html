@@ -1,0 +1,57 @@
+{% extends 'shared/auth_base.html' %}
+{% block title %}Iniciar sesión - PasaLibro{% endblock %}
+{% block back_url %}{{ url_for('main_index') }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth/login.css') }}">
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-card-body">
+                <div class="auth-logo">
+                    <span class="auth-logo-icon"><img width="100" height="100" src="https://img.icons8.com/connect-color/100/book.png" alt="book"/></span>
+                    <h1 class="auth-logo-text">PasaLibro</h1>
+                </div>
+                <p class="auth-subtitle">Inicia sesión para continuar</p>
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    <div class="auth-form-group">
+                        {{ form.email.label(class="auth-label") }}
+                        <div class="auth-input-wrapper">
+                            <i class="fas fa-envelope auth-input-icon"></i>
+                            {{ form.email(class="auth-input" + (" is-invalid" if form.email.errors else ""), placeholder="tu@email.com") }}
+                        </div>
+                        {% for error in form.email.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="auth-form-group">
+                        {{ form.password.label(class="auth-label") }}
+                        <div class="auth-input-wrapper">
+                            <i class="fas fa-lock auth-input-icon"></i>
+                            {{ form.password(class="auth-input" + (" is-invalid" if form.password.errors else ""), placeholder="Ingresa tu contraseña") }}
+                        </div>
+                        {% for error in form.password.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="auth-checkbox-wrapper">
+                        {{ form.remember(class="auth-checkbox") }}
+                        {{ form.remember.label(class="auth-checkbox-label") }}
+                    </div>
+                    <div class="auth-submit-wrapper">
+                        {{ form.submit(class="auth-submit") }}
+                    </div>
+                </form>
+                <div class="auth-links">
+                    <a href="{{ url_for('auth.forgot_password') }}" class="auth-link">¿Olvidaste tu contraseña?</a>
+                    <span class="auth-link-divider"></span>
+                    <a href="{{ url_for('auth.register') }}" class="auth-link">¿No tienes cuenta? Regístrate</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

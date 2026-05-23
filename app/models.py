@@ -29,6 +29,7 @@ class Book(db.Model):
     precio = db.Column(db.Numeric(10, 2), nullable=False)
     descripcion = db.Column(db.Text)
     estado = db.Column(db.String(50), default='disponible')
+    imagen_url = db.Column(db.String(500), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     

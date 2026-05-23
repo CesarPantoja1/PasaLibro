@@ -4,6 +4,7 @@
 .flaskenv
 
 # Archivos de entorno virtual
+.venv/
 venv/
 env/
 ENV/

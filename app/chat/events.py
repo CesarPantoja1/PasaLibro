@@ -1,0 +1,63 @@
+# app/chat/events.py
+from flask import request
+from flask_socketio import emit, join_room, leave_room
+from app.extensions import socketio, db
+from app.models import Message, ChatRoom
+from datetime import datetime
+
+# Este módulo maneja los eventos de WebSocket relacionados con el chat entre compradores y vendedores.
+@socketio.on('join')
+def handle_join(data):
+    # Escucha cuando un estudiante entra a la vista de un chat específico.
+    room_id = str(data.get('room_id'))
+    
+    if room_id:
+        join_room(room_id)
+        # Este print saldrá la terminal para confirmar el éxito del túnel
+        print(f"[WebSocket] Estudiante conectado de forma segura a la sala de Postgres: {room_id}")
+
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    # Escucha cuando un estudiante envía un mensaje de texto. Donde lo procesa, lo guarda en PostgreSQL (Supabase) y lo difunde en la sala.
+    room_id = int(data.get('room_id'))
+    sender_id = int(data.get('sender_id'))
+    contenido = data.get('contenido', '').strip()
+    
+    # Validación básica para evitar mensajes vacíos o solo con espacios
+    if not contenido:
+        return 
+    
+    # Guardar en la base de datos de Supabase
+    nuevo_mensaje = Message(
+        room_id=room_id,
+        sender_id=sender_id,
+        contenido=contenido,
+        created_at=datetime.utcnow()  # UTC estándar para evitar problemas de zona horaria
+    )
+    
+    db.session.add(nuevo_mensaje)
+    db.session.commit()  # Guardado físico en Postgres con SQLAlchemy ORM
+    
+    # Armar el paquete de datos (Payload) para el Frontend
+    payload = {
+        'id': nuevo_mensaje.id,
+        'room_id': room_id,
+        'sender_id': sender_id,
+        'contenido': contenido,
+    
+        'created_at': nuevo_mensaje.created_at.strftime("%H:%M") #Hora en formato militar (HH:MM)
+    }
+    
+    # Broadcast selectivo
+    # Emitimos el evento 'receive_message' ÚNICAMENTE a los dispositivos dentro de esa 'room'
+    emit('receive_message', payload, room=str(room_id))
+
+
+@socketio.on('leave')
+def handle_leave(data):
+    # Escucha cuando el estudiante cierra la pestaña del chat o regresa al catálogo y lo desconecta de la sala.
+    room_id = str(data.get('room_id'))
+    if room_id:
+        leave_room(room_id)
+        print(f"[WebSocket] Estudiante desconectado de la sala: {room_id}")

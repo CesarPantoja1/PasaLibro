@@ -8,14 +8,18 @@ from datetime import datetime
 # Este módulo maneja los eventos de WebSocket relacionados con el chat entre compradores y vendedores.
 @socketio.on('join')
 def handle_join(data):
-    # Escucha cuando un estudiante entra a la vista de un chat específico.
-    room_id = str(data.get('room_id'))
-    
-    if room_id:
-        join_room(room_id)
-        # Este print saldrá la terminal para confirmar el éxito del túnel
-        print(f"[WebSocket] Estudiante conectado de forma segura a la sala de Postgres: {room_id}")
+    room_id = data.get('room_id')
+    if not room_id:
+        return
 
+    #Validamos que la sala exista y que el usuario pertenezca a ella
+    room = ChatRoom.query.get(int(room_id))
+    if not room or (current_user.id != room.buyer_id and current_user.id != room.seller_id):
+        print(f"[WebSocket SEGURIDAD] Intento de acceso no autorizado a la sala {room_id}")
+        return  # Si no pertenece a la sala, lo bloqueamos silenciosamente
+
+    join_room(str(room_id))
+    print(f"[WebSocket] Usuario {current_user.nombre} unido de forma segura a la sala: {room_id}")
 
 @socketio.on('send_message')
 def handle_send_message(data):
@@ -45,7 +49,6 @@ def handle_send_message(data):
         'room_id': room_id,
         'sender_id': sender_id,
         'contenido': contenido,
-    
         'created_at': nuevo_mensaje.created_at.strftime("%H:%M") #Hora en formato militar (HH:MM)
     }
     

@@ -101,7 +101,7 @@
                     {% else %}
                         <!-- Buyer actions -->
                         {% if book.estado == 'disponible' %}
-                        <a href="#" class="btn-action btn-action-chat" onclick="alert('El módulo de chat será implementado por tu compañero Juan. ¡Pronto podrás negociar aquí!')">
+                        <a href="{{ url_for('chat.abrir_chat', book_id=book.id, seller_id=book.user_id) }}" class="btn-action btn-action-chat">
                             <i class="fas fa-comments"></i> Contactar al vendedor
                         </a>
                         {% else %}

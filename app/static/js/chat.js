@@ -49,10 +49,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const isSent = parseInt(data.sender_id) === currentUserId;
         const messageClass = isSent ? "sent" : "received";
 
-        // Crear e inyectar el nodo HTML respetando las clases estáticas de tu colega
+        // Crear nodos seguros para evitar XSS
         const msgDiv = document.createElement("div");
         msgDiv.className = `chat-message ${messageClass}`;
-        msgDiv.innerHTML = `${data.contenido}<small>${data.created_at}</small>`;
+        msgDiv.textContent = data.contenido;
+
+        const timeSmall = document.createElement("small");
+        timeSmall.textContent = data.created_at;
+        msgDiv.appendChild(timeSmall);
 
         chatBox.appendChild(msgDiv);
         scrollToBottom(); // Desplazar hacia abajo para ver el mensaje nuevo

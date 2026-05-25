@@ -14,7 +14,7 @@ def abrir_chat(book_id, seller_id):
     # Evitamos que el usuario inicie un chat consigo mismo
     if buyer_id == seller_id:
         flash('No puedes iniciar un chat contigo mismo.', 'warning')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('books.dashboard'))
     
     # Buscamos si ya existe una sala de chat para este libro entre este comprador y vendedor
     room = ChatRoom.query.filter_by(

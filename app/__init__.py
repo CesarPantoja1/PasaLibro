@@ -36,6 +36,9 @@ def create_app(config_class=Config):
     from app.books.routes import books_bp
     app.register_blueprint(books_bp)
     
+    from app.chat.routes import chat_bp # Importamos el blueprint desde rutas del chat
+    app.register_blueprint(chat_bp)  # Para registar en la fabrica de flask
+    
     # Redirigir inicio al catálogo de libros
     @app.route('/')
     def main_index():

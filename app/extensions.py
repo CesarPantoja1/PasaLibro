@@ -10,6 +10,6 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
-socketio = SocketIO()
 mail = Mail()
 csrf = CSRFProtect()
+socketio = SocketIO(cors_allowed_origins="*") # El CORS evita bloqueos locales de seguridad

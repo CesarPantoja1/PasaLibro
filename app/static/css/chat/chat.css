@@ -1,0 +1,122 @@
+/* app/static/css/chat.css */
+:root {
+    --pl-primary: #0f766e;
+    --pl-primary-dark: #115e59;
+    --pl-surface: #ffffff;
+    --pl-soft: #f4f7f9;
+    --pl-line: #e5e7eb;
+    --pl-text: #374151;
+    --pl-ink: #111827;
+    --pl-success: #10b981;
+    --pl-shadow-md: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.chat-layout {
+    max-width: 850px;
+    margin: auto;
+}
+
+.chat-card {
+    background: var(--pl-surface);
+    border: 1px solid var(--pl-line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--pl-shadow-md);
+}
+
+.chat-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--pl-line);
+    background: #fcfcfd;
+}
+
+.chat-topbar h4 {
+    color: var(--pl-ink);
+    font-size: 1.1rem;
+}
+
+.chat-status {
+    color: var(--pl-success);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.chat-messages {
+    height: 420px;
+    overflow-y: auto;
+    padding: 1.25rem;
+    background: var(--pl-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.chat-message {
+    max-width: 75%;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    line-height: 1.4;
+    font-size: 0.95rem;
+    position: relative;
+}
+
+.chat-message small {
+    display: block;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.sent {
+    align-self: flex-end;
+    background: var(--pl-primary);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.received {
+    align-self: flex-start;
+    background: white;
+    border: 1px solid var(--pl-line);
+    color: var(--pl-text);
+    border-bottom-left-radius: 4px;
+}
+
+.chat-input-wrapper {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--pl-line);
+    background: white;
+}
+
+.chat-input-wrapper input {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--pl-line);
+    border-radius: 10px;
+    outline: none;
+}
+
+.chat-input-wrapper button {
+    border: none;
+    background: var(--pl-primary);
+    color: white;
+    padding: 0.85rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.chat-input-wrapper button:hover {
+    background: var(--pl-primary-dark);
+}
+
+@media(max-width: 768px) {
+    .chat-message { max-width: 90%; }
+}

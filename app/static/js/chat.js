@@ -2,12 +2,16 @@
 document.addEventListener("DOMContentLoaded", () => {
     // 1. Extraer los datos de configuración inyectados por Flask de forma segura
     const configCard = document.getElementById("chat-config");
-    const roomId = configCard.getAttribute("data-room-id");
-    const currentUserId = parseInt(configCard.getAttribute("data-sender-id"));
-
     const chatBox = document.getElementById("chat-box");
     const chatForm = document.getElementById("chat-form");
     const chatInput = document.getElementById("chat-input");
+
+    if (!configCard || !chatBox || !chatForm || !chatInput) {
+        return;
+    }
+
+    const roomId = configCard.dataset.roomId;
+    const currentUserId = Number(configCard.dataset.senderId);
 
     // Función auxiliar para mantener la ventana del chat fija abajo en el último mensaje
     const scrollToBottom = () => {
@@ -43,19 +47,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // 4. Escuchar las transmisiones en vivo del servidor ('events.py')
     socket.on('receive_message', (data) => {
         // Validar si el mensaje pertenece a la sala actual (Seguridad por diseño)
+        if (!data) return;
         if (String(data.room_id) !== String(roomId)) return;
 
         // Determinar dinámicamente si el mensaje es propio o del otro usuario
-        const isSent = parseInt(data.sender_id) === currentUserId;
+        const isSent = Number(data.sender_id) === currentUserId;
         const messageClass = isSent ? "sent" : "received";
 
         // Crear nodos seguros para evitar XSS
         const msgDiv = document.createElement("div");
         msgDiv.className = `chat-message ${messageClass}`;
-        msgDiv.textContent = data.contenido;
+        msgDiv.textContent = data.contenido || "";
 
         const timeSmall = document.createElement("small");
-        timeSmall.textContent = data.created_at;
+        timeSmall.textContent = data.created_at || "";
         msgDiv.appendChild(timeSmall);
 
         chatBox.appendChild(msgDiv);

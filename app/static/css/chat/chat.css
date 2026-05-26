@@ -12,11 +12,19 @@
 }
 
 .chat-layout {
-    max-width: 850px;
-    margin: auto;
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+    padding: clamp(0.25rem, 2vw, 0.75rem) 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .chat-card {
+    width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+    box-sizing: border-box;
     background: var(--pl-surface);
     border: 1px solid var(--pl-line);
     border-radius: 16px;
@@ -28,25 +36,35 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
+    min-width: 0;
     padding: 1rem 1.25rem;
     border-bottom: 1px solid var(--pl-line);
     background: #fcfcfd;
 }
 
 .chat-topbar h4 {
+    min-width: 0;
+    margin: 0;
     color: var(--pl-ink);
     font-size: 1.1rem;
+    overflow-wrap: anywhere;
 }
 
 .chat-status {
+    flex-shrink: 0;
     color: var(--pl-success);
     font-size: 0.9rem;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .chat-messages {
+    max-width: 100%;
+    box-sizing: border-box;
     height: 420px;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1.25rem;
     background: var(--pl-soft);
     display: flex;
@@ -55,12 +73,15 @@
 }
 
 .chat-message {
-    max-width: 75%;
+    max-width: min(75%, 100%);
+    min-width: 0;
     padding: 0.9rem 1rem;
     border-radius: 16px;
     line-height: 1.4;
     font-size: 0.95rem;
     position: relative;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .chat-message small {
@@ -89,6 +110,8 @@
 .chat-input-wrapper {
     display: flex;
     gap: 0.75rem;
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 1rem 1.25rem;
     border-top: 1px solid var(--pl-line);
     background: white;
@@ -96,6 +119,8 @@
 
 .chat-input-wrapper input {
     flex: 1;
+    min-width: 0;
+    width: 100%;
     padding: 0.85rem 1rem;
     border: 1px solid var(--pl-line);
     border-radius: 10px;
@@ -103,6 +128,7 @@
 }
 
 .chat-input-wrapper button {
+    flex: 0 0 auto;
     border: none;
     background: var(--pl-primary);
     color: white;
@@ -118,5 +144,22 @@
 }
 
 @media(max-width: 768px) {
-    .chat-message { max-width: 90%; }
+    .chat-message { max-width: min(90%, 100%); }
+}
+
+@media(max-width: 576px) {
+    .chat-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .chat-input-wrapper {
+        gap: 0.5rem;
+        padding: 0.85rem;
+    }
+
+    .chat-input-wrapper button {
+        padding: 0.85rem 1rem;
+    }
 }

@@ -1,9 +1,15 @@
 # app/chat/events.py
-from flask import request
 from flask_socketio import emit, join_room, leave_room
+from flask_login import current_user
 from app.extensions import socketio, db
 from app.models import Message, ChatRoom
 from datetime import datetime
+import pytz
+
+try:
+    QUITO_TZ = pytz.timezone("America/Quito")
+except pytz.UnknownTimeZoneError:
+    QUITO_TZ = pytz.timezone("America/Guayaquil")
 
 # Este módulo maneja los eventos de WebSocket relacionados con el chat entre compradores y vendedores.
 @socketio.on('join')
@@ -24,20 +30,31 @@ def handle_join(data):
 @socketio.on('send_message')
 def handle_send_message(data):
     # Escucha cuando un estudiante envía un mensaje de texto. Donde lo procesa, lo guarda en PostgreSQL (Supabase) y lo difunde en la sala.
+    if not current_user.is_authenticated:
+        return
+
     room_id = int(data.get('room_id'))
-    sender_id = int(data.get('sender_id'))
+    sender_id = current_user.id
     contenido = data.get('contenido', '').strip()
+
+    room = ChatRoom.query.get(room_id)
+    if not room or (sender_id != room.buyer_id and sender_id != room.seller_id):
+        print(f"[WebSocket SEGURIDAD] Intento de envío no autorizado a la sala {room_id}")
+        return
     
     # Validación básica para evitar mensajes vacíos o solo con espacios
     if not contenido:
         return 
+
+    # Ajuste de zona horaria: guardar y emitir la hora local de Quito, Ecuador.
+    fecha_quito = datetime.now(QUITO_TZ)
     
     # Guardar en la base de datos de Supabase
     nuevo_mensaje = Message(
         room_id=room_id,
         sender_id=sender_id,
         contenido=contenido,
-        created_at=datetime.utcnow()  # UTC estándar para evitar problemas de zona horaria
+        created_at=fecha_quito
     )
     
     db.session.add(nuevo_mensaje)
@@ -49,12 +66,12 @@ def handle_send_message(data):
         'room_id': room_id,
         'sender_id': sender_id,
         'contenido': contenido,
-        'created_at': nuevo_mensaje.created_at.strftime("%H:%M") #Hora en formato militar (HH:MM)
+        'created_at': fecha_quito.strftime("%H:%M") #Hora en formato militar (HH:MM)
     }
     
     # Broadcast selectivo
     # Emitimos el evento 'receive_message' ÚNICAMENTE a los dispositivos dentro de esa 'room'
-    emit('receive_message', payload, room=str(room_id))
+    emit('receive_message', payload, room=str(room_id), include_self=True)
 
 
 @socketio.on('leave')

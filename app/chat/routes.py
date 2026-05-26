@@ -1,5 +1,5 @@
 # app/chat/routes.py
-from flask import Blueprint, current_app, render_template, redirect, url_for, flash
+from flask import Blueprint, current_app, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
@@ -15,11 +15,16 @@ def abrir_chat(book_id, seller_id):
     room = None
 
     if current_user.id == seller_id:
-        # El vendedor abre una sala existente desde su bandeja.
-        room = ChatRoom.query.filter_by(
+        # El vendedor abre una sala exacta desde su bandeja usando el comprador interesado.
+        buyer_id_param = request.args.get('buyer_id', type=int)
+        room_query = ChatRoom.query.filter_by(
             book_id=book_id,
             seller_id=seller_id
-        ).order_by(ChatRoom.created_at.desc()).first()
+        )
+        if buyer_id_param:
+            room_query = room_query.filter_by(buyer_id=buyer_id_param)
+
+        room = room_query.order_by(ChatRoom.created_at.desc()).first()
 
         if not room:
             flash('No se encontro una conversacion activa para este libro.', 'warning')

@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_required, login_user, logout_user, current_user
 from itsdangerous import URLSafeTimedSerializer
 from app.extensions import db, bcrypt, mail
 from app.models import User
@@ -83,6 +83,7 @@ def login():
 
 
 @auth_bp.route('/logout')
+@login_required
 def logout():
     logout_user()
     flash('Has cerrado sesión.', 'info')

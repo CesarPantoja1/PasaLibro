@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from flask import Blueprint, current_app, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from app.extensions import db
 from app.models import Book
@@ -137,7 +137,14 @@ def delete(id):
         abort(403)
 
     if book.imagen_url:
-        delete_image(book.imagen_url)
+        try:
+            delete_image(book.imagen_url)
+        except Exception as exc:
+            current_app.logger.warning(
+                'No se pudo eliminar la imagen del libro %s: %s',
+                book.id,
+                exc
+            )
 
     db.session.delete(book)
     db.session.commit()

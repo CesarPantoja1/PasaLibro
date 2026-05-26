@@ -77,7 +77,7 @@
                                                 <i class="fas fa-user me-2"></i>{{ room.buyer.nombre }}
                                             </p>
                                         </div>
-                                        <a class="btn btn-primary flex-shrink-0" href='{{ url_for("chat.abrir_chat", book_id=room.book_id, seller_id=room.book.user_id) }}'>
+                                        <a class="btn btn-primary flex-shrink-0" href='{{ url_for("chat.abrir_chat", book_id=room.book_id, seller_id=room.book.user_id, buyer_id=room.buyer_id) }}'>
                                             <i class="fas fa-comments me-2"></i>Abrir Chat
                                         </a>
                                     </div>

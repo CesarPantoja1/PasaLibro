@@ -48,6 +48,9 @@ class ChatRoom(db.Model):
     seller_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Relaciones directas para identificar a cada participante del chat.
+    buyer = db.relationship('User', foreign_keys=[buyer_id], backref='buyer_chat_rooms')
+    seller = db.relationship('User', foreign_keys=[seller_id], backref='seller_chat_rooms')
     messages = db.relationship('Message', backref='room', lazy='dynamic', cascade='all, delete-orphan')
     
     def __repr__(self):

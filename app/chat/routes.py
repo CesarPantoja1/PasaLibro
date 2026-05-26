@@ -1,6 +1,8 @@
 # app/chat/routes.py
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, current_app, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
+from sqlalchemy import or_
+from sqlalchemy.orm import joinedload
 from app.models import ChatRoom, Message, Book, db
 
 chat_bp = Blueprint('chat', __name__, template_folder='templates')
@@ -10,24 +12,31 @@ chat_bp = Blueprint('chat', __name__, template_folder='templates')
 @login_required
 def abrir_chat(book_id, seller_id):
     buyer_id = current_user.id
-    
-    # Evitamos que el usuario inicie un chat consigo mismo
-    if buyer_id == seller_id:
-        flash('No puedes iniciar un chat contigo mismo.', 'warning')
-        return redirect(url_for('books.dashboard'))
-    
-    # Buscamos si ya existe una sala de chat para este libro entre este comprador y vendedor
-    room = ChatRoom.query.filter_by(
-        book_id=book_id,
-        buyer_id=buyer_id,
-        seller_id=seller_id
-    ).first()
-    
-    # Si no existe la sala de chat, la creamos
-    if not room:
-        room = ChatRoom(book_id=book_id, buyer_id=buyer_id, seller_id=seller_id)
-        db.session.add(room)
-        db.session.commit()
+    room = None
+
+    if current_user.id == seller_id:
+        # El vendedor abre una sala existente desde su bandeja.
+        room = ChatRoom.query.filter_by(
+            book_id=book_id,
+            seller_id=seller_id
+        ).order_by(ChatRoom.created_at.desc()).first()
+
+        if not room:
+            flash('No se encontro una conversacion activa para este libro.', 'warning')
+            return redirect(url_for('chat.bandeja'))
+    else:
+        # Buscamos si ya existe una sala de chat para este libro entre este comprador y vendedor
+        room = ChatRoom.query.filter_by(
+            book_id=book_id,
+            buyer_id=buyer_id,
+            seller_id=seller_id
+        ).first()
+
+        # Si no existe la sala de chat, la creamos
+        if not room:
+            room = ChatRoom(book_id=book_id, buyer_id=buyer_id, seller_id=seller_id)
+            db.session.add(room)
+            db.session.commit()
     
     # Obtenemos el historial de mensajes para mostrar en la sala de chat (ordenados del mas viejo al mas nuevo)    
     historial_mensajes = room.messages.order_by(Message.created_at.asc()).all()
@@ -35,6 +44,24 @@ def abrir_chat(book_id, seller_id):
     
     #Mandamos a la plantilla la sala de chat, el historial de mensajes y los datos del libro
     return render_template('chat/room.html', room=room, mensajes=historial_mensajes, libro=libro)
+
+@chat_bp.route('/chat/bandeja', endpoint='bandeja')
+@login_required
+def bandeja_entrada():
+    try:
+        # Cargamos las salas donde el usuario participa como comprador o vendedor.
+        salas = ChatRoom.query.options(
+            joinedload(ChatRoom.book).joinedload(Book.owner),
+            joinedload(ChatRoom.buyer)
+        ).filter(
+            or_(ChatRoom.buyer_id == current_user.id, ChatRoom.seller_id == current_user.id)
+        ).order_by(ChatRoom.created_at.desc()).all()
+    except Exception:
+        current_app.logger.exception('Error al cargar la bandeja de entrada')
+        flash('No se pudieron cargar tus mensajes. Intentalo nuevamente.', 'error')
+        salas = []
+
+    return render_template('chat/inbox.html', rooms=salas)
 
 # Importamos los eventos de SocketIO al final para evitar importaciones circulares
 from app.chat import events

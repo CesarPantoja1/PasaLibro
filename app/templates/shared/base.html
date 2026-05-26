@@ -43,6 +43,11 @@
                             <i class="fas fa-bookmark"></i> Mis libros
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'chat.bandeja' %}active{% endif %}" href="{{ url_for('chat.bandeja') }}">
+                            <i class="fas fa-comments"></i> Chats
+                        </a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav app-nav-user">
                     <li class="nav-item">

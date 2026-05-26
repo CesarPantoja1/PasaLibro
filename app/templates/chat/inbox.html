@@ -4,50 +4,99 @@
 
 {% block content %}
 <section class="row justify-content-center">
-    <div class="col-12 col-lg-9">
+    <div class="col-12 col-lg-10">
         <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
             <div>
                 <h1 class="h3 fw-bold mb-1">Mis Mensajes</h1>
-                <p class="text-muted mb-0">Conversaciones activas sobre tus libros.</p>
+                <p class="text-muted mb-0">Tus conversaciones activas, separadas por compras y ventas.</p>
             </div>
             <a class="btn btn-outline-secondary" href="{{ url_for('books.dashboard') }}">
                 <i class="fas fa-layer-group me-2"></i>Cat&aacute;logo
             </a>
         </div>
 
-        {% if rooms %}
-            <div class="card shadow-sm">
-                <div class="list-group list-group-flush">
-                    {% for room in rooms %}
-                        {% set other_person = room.book.owner.nombre if current_user.id == room.buyer_id else room.buyer.nombre %}
-                        <div class="list-group-item p-3 p-md-4">
-                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                                <div class="min-w-0">
-                                    <h2 class="h5 fw-semibold mb-1 text-truncate">{{ room.book.titulo }}</h2>
-                                    <p class="text-muted mb-0">
-                                        <i class="fas fa-user me-2"></i>{{ other_person }}
-                                    </p>
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <ul class="nav nav-tabs card-header-tabs" id="inboxTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="compras-tab" data-bs-toggle="tab" data-bs-target="#compras-pane" type="button" role="tab" aria-controls="compras-pane" aria-selected="true">
+                            <i class="fas fa-bag-shopping me-2"></i>Libros que quiero comprar
+                            <span class="badge text-bg-secondary ms-2">{{ compras|length }}</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="ventas-tab" data-bs-toggle="tab" data-bs-target="#ventas-pane" type="button" role="tab" aria-controls="ventas-pane" aria-selected="false">
+                            <i class="fas fa-book-open me-2"></i>Mis libros en venta
+                            <span class="badge text-bg-secondary ms-2">{{ ventas|length }}</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tab-content" id="inboxTabsContent">
+                <div class="tab-pane fade show active" id="compras-pane" role="tabpanel" aria-labelledby="compras-tab" tabindex="0">
+                    {% if compras %}
+                        <div class="list-group list-group-flush">
+                            {% for room in compras %}
+                                <div class="list-group-item p-3 p-md-4">
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                        <div class="min-w-0">
+                                            <h2 class="h5 fw-semibold mb-1 text-truncate">{{ room.book.titulo }}</h2>
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-user me-2"></i>{{ room.book.owner.nombre }}
+                                            </p>
+                                        </div>
+                                        <a class="btn btn-primary flex-shrink-0" href='{{ url_for("chat.abrir_chat", book_id=room.book_id, seller_id=room.book.user_id) }}'>
+                                            <i class="fas fa-comments me-2"></i>Abrir Chat
+                                        </a>
+                                    </div>
                                 </div>
-                                <a class="btn btn-primary flex-shrink-0" href='{{ url_for("chat.abrir_chat", book_id=room.book_id, seller_id=room.book.user_id) }}'>
-                                    <i class="fas fa-comments me-2"></i>Abrir Chat
-                                </a>
-                            </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 px-3">
+                            <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                            <h2 class="h5 fw-semibold">No tienes mensajes activos</h2>
+                            <p class="text-muted mb-4">Cuando preguntes por un libro, la conversacion aparecera aqui.</p>
+                            <a class="btn btn-primary" href="{{ url_for('books.dashboard') }}">
+                                <i class="fas fa-layer-group me-2"></i>Volver al cat&aacute;logo
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="tab-pane fade" id="ventas-pane" role="tabpanel" aria-labelledby="ventas-tab" tabindex="0">
+                    {% if ventas %}
+                        <div class="list-group list-group-flush">
+                            {% for room in ventas %}
+                                <div class="list-group-item p-3 p-md-4">
+                                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                        <div class="min-w-0">
+                                            <h2 class="h5 fw-semibold mb-1 text-truncate">{{ room.book.titulo }}</h2>
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-user me-2"></i>{{ room.buyer.nombre }}
+                                            </p>
+                                        </div>
+                                        <a class="btn btn-primary flex-shrink-0" href='{{ url_for("chat.abrir_chat", book_id=room.book_id, seller_id=room.book.user_id) }}'>
+                                            <i class="fas fa-comments me-2"></i>Abrir Chat
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 px-3">
+                            <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
+                            <h2 class="h5 fw-semibold">No tienes mensajes activos</h2>
+                            <p class="text-muted mb-4">Cuando alguien escriba por uno de tus libros, lo veras aqui.</p>
+                            <a class="btn btn-primary" href="{{ url_for('books.my_books') }}">
+                                <i class="fas fa-bookmark me-2"></i>Ver mis libros
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-        {% else %}
-            <div class="card shadow-sm">
-                <div class="card-body text-center py-5">
-                    <i class="fas fa-inbox fa-2x text-muted mb-3"></i>
-                    <h2 class="h4 fw-semibold">No tienes mensajes activos</h2>
-                    <p class="text-muted mb-4">Cuando inicies o recibas una conversaci&oacute;n, aparecer&aacute; aqu&iacute;.</p>
-                    <a class="btn btn-primary" href="{{ url_for('books.dashboard') }}">
-                        <i class="fas fa-layer-group me-2"></i>Volver al cat&aacute;logo
-                    </a>
-                </div>
-            </div>
-        {% endif %}
+        </div>
     </div>
 </section>
 {% endblock %}

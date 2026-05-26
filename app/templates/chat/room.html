@@ -13,9 +13,21 @@
          data-room-id="{{ room.id }}" 
          data-sender-id="{{ current_user.id }}">
         
-        <div class="chat-topbar">
-            <h4>Conversación: {{ libro.titulo }} (Vendedor: {{ room.book.owner.nombre }})</h4>
-            <span class="chat-status">En línea</span>
+        <div class="chat-topbar card-header d-flex align-items-center justify-content-between p-3 p-md-4">
+            <div class="min-w-0">
+                <h4 class="mb-1 text-truncate">
+                    <i class="fas fa-user-circle me-2"></i>
+                    {% if current_user.id == room.buyer_id %}
+                        {{ room.book.owner.nombre }}
+                    {% else %}
+                        {{ room.buyer.nombre }}
+                    {% endif %}
+                </h4>
+                <span class="chat-status">En l&iacute;nea</span>
+            </div>
+            <span class="badge text-bg-light border text-secondary text-wrap text-start">
+                Libro: {{ room.book.titulo }}
+            </span>
         </div>
 
         <div class="chat-messages" id="chat-box">

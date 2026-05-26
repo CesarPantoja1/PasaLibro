@@ -49,19 +49,28 @@ def abrir_chat(book_id, seller_id):
 @login_required
 def bandeja_entrada():
     try:
-        # Cargamos las salas donde el usuario participa como comprador o vendedor.
-        salas = ChatRoom.query.options(
+        # Precargamos libro, vendedor y comprador para evitar consultas perezosas en la vista.
+        opciones_chat = (
             joinedload(ChatRoom.book).joinedload(Book.owner),
             joinedload(ChatRoom.buyer)
-        ).filter(
-            or_(ChatRoom.buyer_id == current_user.id, ChatRoom.seller_id == current_user.id)
+        )
+
+        # Chats iniciados por libros que el usuario quiere comprar.
+        compras = ChatRoom.query.options(*opciones_chat).filter(
+            ChatRoom.buyer_id == current_user.id
+        ).order_by(ChatRoom.created_at.desc()).all()
+
+        # Chats recibidos por libros publicados por el usuario.
+        ventas = ChatRoom.query.options(*opciones_chat).filter(
+            ChatRoom.seller_id == current_user.id
         ).order_by(ChatRoom.created_at.desc()).all()
     except Exception:
         current_app.logger.exception('Error al cargar la bandeja de entrada')
         flash('No se pudieron cargar tus mensajes. Intentalo nuevamente.', 'error')
-        salas = []
+        compras = []
+        ventas = []
 
-    return render_template('chat/inbox.html', rooms=salas)
+    return render_template("chat/inbox.html", compras=compras, ventas=ventas)
 
 # Importamos los eventos de SocketIO al final para evitar importaciones circulares
 from app.chat import events

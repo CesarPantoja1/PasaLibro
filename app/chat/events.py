@@ -2,14 +2,7 @@
 from flask_socketio import emit, join_room, leave_room
 from flask_login import current_user
 from app.extensions import socketio, db
-from app.models import Message, ChatRoom
-from datetime import datetime
-import pytz
-
-try:
-    QUITO_TZ = pytz.timezone("America/Quito")
-except pytz.UnknownTimeZoneError:
-    QUITO_TZ = pytz.timezone("America/Guayaquil")
+from app.models import Message, ChatRoom, quito_now
 
 # Este módulo maneja los eventos de WebSocket relacionados con el chat entre compradores y vendedores.
 @socketio.on('join')
@@ -47,7 +40,7 @@ def handle_send_message(data):
         return 
 
     # Ajuste de zona horaria: guardar y emitir la hora local de Quito, Ecuador.
-    fecha_quito = datetime.now(QUITO_TZ)
+    fecha_quito = quito_now()
     
     # Guardar en la base de datos de Supabase
     nuevo_mensaje = Message(
@@ -66,6 +59,7 @@ def handle_send_message(data):
         'room_id': room_id,
         'sender_id': sender_id,
         'contenido': contenido,
+        'time': fecha_quito.strftime("%H:%M"),
         'created_at': fecha_quito.strftime("%H:%M") #Hora en formato militar (HH:MM)
     }
     

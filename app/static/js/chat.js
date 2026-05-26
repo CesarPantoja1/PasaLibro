@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         msgDiv.textContent = data.contenido || "";
 
         const timeSmall = document.createElement("small");
-        timeSmall.textContent = data.created_at || "";
+        timeSmall.textContent = data.time || data.created_at || "";
         msgDiv.appendChild(timeSmall);
 
         chatBox.appendChild(msgDiv);

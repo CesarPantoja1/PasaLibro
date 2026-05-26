@@ -1,6 +1,18 @@
 from datetime import datetime
 from app.extensions import db
 from flask_login import UserMixin
+import pytz
+
+
+def quito_timezone():
+    try:
+        return pytz.timezone("America/Quito")
+    except pytz.UnknownTimeZoneError:
+        return pytz.timezone("America/Guayaquil")
+
+
+def quito_now():
+    return datetime.now(quito_timezone())
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -64,7 +76,21 @@ class Message(db.Model):
     contenido = db.Column(db.Text, nullable=False)
     room_id = db.Column(db.Integer, db.ForeignKey('chat_rooms.id'), nullable=False)
     sender_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(quito_timezone()))
+
+    @property
+    def hora_formateada(self):
+        if not self.created_at:
+            return ""
+
+        tz = quito_timezone()
+        if self.created_at.tzinfo is None:
+            # Los registros antiguos pueden venir sin zona; se interpretan como hora local de Ecuador.
+            dt_local = tz.localize(self.created_at)
+        else:
+            dt_local = self.created_at.astimezone(tz)
+
+        return dt_local.strftime('%H:%M')
     
     def __repr__(self):
         return f'<Message {self.id}>'

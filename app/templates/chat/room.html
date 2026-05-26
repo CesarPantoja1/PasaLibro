@@ -34,7 +34,7 @@
             {% for mensaje in mensajes %}
                 <div class="chat-message {% if mensaje.sender_id == current_user.id %}sent{% else %}received{% endif %}">
                     {{ mensaje.contenido }}
-                    <small>{{ mensaje.created_at.strftime('%H:%M') }}</small>
+                    <small>{{ mensaje.hora_formateada }}</small>
                 </div>
             {% endfor %}
         </div>

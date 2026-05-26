@@ -43,7 +43,8 @@ def abrir_chat(book_id, seller_id):
             db.session.add(room)
             db.session.commit()
     
-    # Obtenemos el historial de mensajes para mostrar en la sala de chat (ordenados del mas viejo al mas nuevo)    
+    # El template usa Message.hora_formateada para imprimir la hora local sin aplicar desfases.
+    # Obtenemos el historial de mensajes para mostrar en la sala de chat (ordenados del mas viejo al mas nuevo)
     historial_mensajes = room.messages.order_by(Message.created_at.asc()).all()
     libro = Book.query.get_or_404(book_id)
     
